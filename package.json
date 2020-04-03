@@ -1,12 +1,20 @@
 {
-    "name": "my-otp",
+    "name": "otp-wallet",
     "version": "1.0.0",
     "main": "index.js",
     "license": "MIT",
     "dependencies": {
-        "otplib": "^12.0.1"
+        "configstore": "^5.0.1",
+        "human-readable-ids": "^1.0.4",
+        "inquirer": "^7.1.0",
+        "otplib": "^12.0.1",
+        "yargs": "^15.3.1"
     },
     "bin": {
-        "my-otp": "index.js"
+        "otp-wallet": "index.js"
+    },
+    "devDependencies": {
+        "@types/configstore": "^4.0.0",
+        "@types/inquirer": "^6.5.0"
     }
 }
