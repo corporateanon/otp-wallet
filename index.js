@@ -18,8 +18,8 @@ const main = async () => {
             '$0',
             'List secrets',
             () => {},
-            (argv) => {
-                console.log('list');
+            () => {
+                ui.getSecrets();
             }
         )
         .command(
