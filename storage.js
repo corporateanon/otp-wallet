@@ -34,4 +34,24 @@ exports.Storage = class Storage {
         const secrets = this.configstore.get('secrets') || [];
         return secrets;
     }
+
+    /**
+     * @param {string[]} names
+     * @returns {number} a number of secrets deleted
+     */
+    deleteSecrets(names) {
+        /**
+         * @type {Array<Secret>}
+         */
+        const secrets = this.configstore.get('secrets') || [];
+        const newSecrets = secrets.filter(
+            ({ name: secretName }) => !names.includes(secretName)
+        );
+        const deleted = secrets.length - newSecrets.length;
+
+        if (deleted) {
+            this.configstore.set('secrets', newSecrets);
+        }
+        return deleted;
+    }
 };

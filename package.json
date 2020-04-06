@@ -1,13 +1,15 @@
 {
     "name": "otp-wallet",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "main": "index.js",
     "license": "MIT",
     "dependencies": {
+        "charm": "^1.0.2",
         "configstore": "^5.0.1",
         "human-readable-ids": "^1.0.4",
         "inquirer": "^7.1.0",
         "otplib": "^12.0.1",
+        "sleep-promise": "^8.0.1",
         "yargs": "^15.3.1"
     },
     "bin": {

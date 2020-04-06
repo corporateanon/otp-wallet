@@ -1,53 +1,107 @@
 const { hri } = require('human-readable-ids');
 const inquirer = require('inquirer');
 const otplib = require('otplib');
+const charm = require('charm');
+const sleep = require('sleep-promise');
 
 const gauges = '▏▎▌▋▊▉';
 const gaugeLength = 48;
 
 class UI {
     /**
-     * @param {{storage:import('./storage').Storage}} options
+     * @param {{storage:import('./storage').Storage}}
      */
     constructor({ storage }) {
         this.storage = storage;
     }
 
-    async addSecret() {
-        const answers = await inquirer.prompt([
-            {
-                name: 'secret',
-                type: 'password',
-                validate: (value) => (value.length > 0 ? true : 'Required'),
-            },
-            { name: 'name', type: 'input', default: hri.random() },
-        ]);
+    /**
+     * @param { { secret: string | null, name: string | null } }
+     */
+    async addSecret({ secret, name }) {
+        if (secret === null) {
+            const answers = await inquirer.prompt([
+                {
+                    name: 'secret',
+                    type: 'password',
+                    validate: (value) => (value.length > 0 ? true : 'Required'),
+                },
+                {
+                    name: 'name',
+                    type: 'input',
+                    default: hri.random(),
+                    validate: (value) => (value.length > 0 ? true : 'Required'),
+                },
+            ]);
 
-        this.storage.addSecret(answers.name, answers.secret);
-        console.log(`Secret ${answers.name} added`);
+            secret = answers.secret;
+            name = answers.name;
+        } else {
+            if (name === null) {
+                name = hri.random();
+            }
+        }
+
+        this.storage.addSecret(name, secret);
+        console.log(`Secret ${name} added`);
     }
 
-    getSecrets() {
-        const secrets = this.storage.getSecrets();
-        for (const { name, value } of secrets) {
-            const token = otplib.authenticator.generate(value);
-            console.log(`${token} ${name}`);
-        }
-        const timeRemaining = otplib.authenticator.timeRemaining();
-        const timeUsed = otplib.authenticator.timeUsed();
-        const remaining = timeRemaining / (timeRemaining + timeUsed);
-        const numPixels = Math.floor(gaugeLength * remaining);
-        const numFullBlocks = Math.floor(numPixels / 8);
+    /**
+     * @param { { once: boolean } }
+     */
+    async getSecrets({ once = false }) {
+        const ch = charm();
+        ch.pipe(process.stdout);
+        ch.cursor(false);
 
-        const gauge = [];
-        for (let i = 0; i < numFullBlocks; i++) {
-            gauge.push('█');
+        for (;;) {
+            const secrets = this.storage.getSecrets();
+            for (const { name, value } of secrets) {
+                const token = otplib.authenticator.generate(value);
+                console.log(`${token} ${name} `);
+            }
+
+            const timeRemaining = otplib.authenticator.timeRemaining();
+            const timeUsed = otplib.authenticator.timeUsed();
+            const remaining = timeRemaining / (timeRemaining + timeUsed);
+            const numPixels = Math.floor(gaugeLength * remaining);
+            const numFullBlocks = Math.floor(numPixels / 8);
+
+            const gauge = [];
+            for (let i = 0; i < numFullBlocks; i++) {
+                gauge.push('█');
+            }
+            const remainderLength = numPixels % 8;
+            if (remainderLength > 0) {
+                gauge.push(gauges[remainderLength - 1]);
+            }
+
+            console.log(gauge.join('') + ' ');
+            if (once) {
+                return;
+            }
+            await sleep(1000);
+
+            ch.up(1 + secrets.length);
         }
-        const remainderLength = numPixels % 8;
-        if (remainderLength > 0) {
-            gauge.push(gauges[remainderLength - 1]);
+    }
+
+    /**
+     * @param { { name: string[] } }
+     */
+    async deleteSecrets({ names }) {
+        if (names.length === 0) {
+            const answers = await inquirer.prompt([
+                {
+                    name: 'names',
+                    type: 'checkbox',
+                    choices: this.storage.getSecrets().map(({ name }) => name),
+                },
+            ]);
+            names = answers.names;
         }
-        console.log(gauge.join(''));
+        const deleted = this.storage.deleteSecrets(names);
+        console.log(`${deleted} secrets were deleted`);
     }
 }
 

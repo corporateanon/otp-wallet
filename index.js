@@ -15,19 +15,51 @@ const main = async () => {
 
     yargs
         .command(
-            '$0',
+            '$0 [--once,-o]',
             'List secrets',
-            () => {},
-            () => {
-                ui.getSecrets();
+            (yargs) => {
+                yargs.option('once', {
+                    alias: 'o',
+                    type: 'boolean',
+                    description: 'run once',
+                });
+            },
+            async ({ once }) => {
+                await ui.getSecrets({ once });
             }
         )
         .command(
-            'add',
+            'add [secret [name]]',
             'Add a secret',
-            () => {},
-            (argv) => {
-                ui.addSecret();
+            (yargs) => {
+                yargs
+                    .positional('secret', {
+                        description: 'secret code',
+                        default: null,
+                        type: 'string',
+                    })
+                    .positional('name', {
+                        description: 'secret name',
+                        default: null,
+                        type: 'string',
+                    });
+            },
+            async ({ secret, name }) => {
+                await ui.addSecret({ secret, name });
+            }
+        )
+        .command(
+            'delete [names..]',
+            'Delete a secret',
+            (yargs) => {
+                yargs.positional('names', {
+                    type: 'string',
+                    description: 'Names of secrets to delete',
+                });
+            },
+            async ({ names }) => {
+                console.log({ names });
+                await ui.deleteSecrets({ names });
             }
         ).argv;
 };
