@@ -52,7 +52,6 @@ class UI {
     async getSecrets({ once = false }) {
         const ch = charm();
         ch.pipe(process.stdout);
-        ch.cursor(false);
 
         for (;;) {
             const secrets = this.storage.getSecrets();
