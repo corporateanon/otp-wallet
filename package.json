@@ -3,6 +3,9 @@
     "version": "0.0.5",
     "main": "index.js",
     "license": "MIT",
+    "files": [
+        "*.js"
+    ],
     "dependencies": {
         "charm": "^1.0.2",
         "configstore": "^5.0.1",
