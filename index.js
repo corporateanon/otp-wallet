@@ -15,17 +15,19 @@ const main = async () => {
 
     yargs
         .command(
-            '$0 [--once,-o]',
-            'List secrets',
-            (yargs) => {
-                yargs.option('once', {
-                    alias: 'o',
-                    type: 'boolean',
-                    description: 'run once',
-                });
-            },
-            async ({ once }) => {
-                await ui.getSecrets({ once });
+            '$0',
+            'List secrets in real time',
+            () => {},
+            async () => {
+                await ui.getSecrets({ once: false });
+            }
+        )
+        .command(
+            'once',
+            'List secrets once',
+            () => {},
+            async () => {
+                await ui.getSecrets({ once: true });
             }
         )
         .command(
