@@ -60,7 +60,6 @@ const main = async () => {
                 });
             },
             async ({ names }) => {
-                console.log({ names });
                 await ui.deleteSecrets({ names });
             }
         ).argv;
